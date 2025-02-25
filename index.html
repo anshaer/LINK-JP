@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // 取得目前的路徑
+        let path = decodeURIComponent(window.location.pathname);
+
+        // 定義所有分類的 JSON 檔案
+        const categories = ["vtuber", "繪師", "網站", "新聞", "直播", "特殊"];
+        const jsonFiles = categories.map(cat => `/redirects/${cat}.json`);
+
+        // 讀取所有 JSON 檔案
+        Promise.all(jsonFiles.map(file =>
+            fetch(file)
+                .then(res => res.ok ? res.json() : {})
+                .catch(() => ({}))
+        ))
+        .then(responses => {
+            // 合併所有 JSON 內容
+            const redirects = Object.assign({}, ...responses);
+
+            // 檢查是否有對應的轉址網址
+            if (redirects[path]) {
+                window.location.href = redirects[path];
+            } else {
+                document.body.innerHTML = `
+                    <h1>暫時無法到達</h1>
+                    <p>無法找到 ${path} 。</p>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading redirects:', error);
+            document.body.innerHTML = "<h1>暫時無法到達</h1>";
+        });
+    </script>
+</head>
+<body>
+    <noscript>
+        <h1>請啟用 JavaScript </h1>
+    </noscript>
+</body>
+</html>
