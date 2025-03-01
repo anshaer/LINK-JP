@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轉址搜尋</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+            position: relative;
+        }
+        h1 {
+            color: #333;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            padding: 10px;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .fixed-links {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 16px;
+        }
+        .fixed-links a {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="fixed-links">
+        <a href="https://連結.com/README.md" target="_blank">使用說明</a>
+        <a href="https://forms.gle/45uNperz1Y9buYsu8" target="_blank">新增</a>
+        <a href="mailto:ggh19950808@gmail.com" target="_blank">技術聯繫</a>
+    </div>
+    
+    <h1>轉址搜尋</h1>
+    <input type="text" id="search" placeholder="輸入關鍵字搜尋">
+    <ul id="results"></ul>
+    
+    <script>
+        const categories = ["vtuber", "繪師", "網站", "新聞", "直播", "特殊"];
+        const jsonFiles = categories.map(cat => `/redirects/${cat}.json`);
+        let redirects = {};
+
+        Promise.all(jsonFiles.map(file => 
+            fetch(file).then(res => res.ok ? res.json() : {}).catch(() => ({}))
+        )).then(responses => {
+            redirects = Object.assign({}, ...responses);
+        });
+
+        document.getElementById('search').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const resultsList = document.getElementById('results');
+            resultsList.innerHTML = '';
+            
+            if (!query) return;
+            
+            Object.entries(redirects).forEach(([path, url]) => {
+                if (path.toLowerCase().includes(query) || url.toLowerCase().includes(query)) {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${url}" target="_blank">連結.com${path} → ${url}</a>`;
+                    resultsList.appendChild(li);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
